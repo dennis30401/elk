@@ -43,7 +43,7 @@ def send_number_to_elastucSearch(es):
         "PeopleNum":peopleNumber
     }
     print("number:",peopleNumber,type(peopleNumber),fmDate)
-    # es.index(index='opentest',body = datas)
+    es.index(index='opentest',body = datas)
 
 def send_humidity_to_elastucSearch(es):
     fmDate = get_datetime()
@@ -53,11 +53,11 @@ def send_humidity_to_elastucSearch(es):
         "humidity":humidity
     }
     print("hum:",humidity,type(humidity),fmDate)
-    # es.index(index='humtest',body = datas)
+    es.index(index='humtest',body = datas)
 
 def multipleSchedulers():
     """ Manually set the tasks you want to schedule """
-    es = Elasticsearch(hosts='127.0.0.1', port=9200)
+    es = Elasticsearch(hosts='140.134.25.64', port=19200)
     scheduler1 = schedule.Scheduler()  # to send people number to es 
     scheduler2 = schedule.Scheduler()  # to send humidity to es
     scheduler1.every().hour.at(":00").do(send_number_to_elastucSearch,es)
