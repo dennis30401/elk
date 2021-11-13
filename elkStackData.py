@@ -7,14 +7,15 @@ import random
 from datetime import datetime, timezone, timedelta
 
 def get_humidity():
-    # humidity_URL = "http://192.168.0.16/things/temp-hum-light-1/properties"
-    # response = requests.get(humidity_URL)
-    # property_text = response.text
-    # property_json = json.loads(property_text)
+    humidity_URL = "http://127.0.0.1/things/temp-hum-light-1/properties"
+    response = requests.get(humidity_URL)
+    property_text = response.text
+    property_json = json.loads(property_text)
     # print("humidity:" , property_json["hum"],end=' ')
     # print("light:" , property_json["light"],end=' ')
     # print("temp:" , property_json["temp"])
-    hum = random.randint(0,100)
+    # hum = random.randint(0,100)
+    hum = property_json["hum"]
     return hum
 
 def get_people():
@@ -93,8 +94,8 @@ def multipleSchedulers():
 
 if __name__ == '__main__':
     print("start scheduler")
-    multipleSchedulers()
+    #　multipleSchedulers()
     # no scheduler test
-    # es = Elasticsearch(hosts='140.134.25.64', port=19200)
-    # send_humidity_to_elastucSearch(es)
-    # send_number_to_elastucSearch(es)
+    es = Elasticsearch(hosts='140.134.25.64', port=19200)
+    send_humidity_to_elastucSearch(es)
+    send_number_to_elastucSearch(es)
