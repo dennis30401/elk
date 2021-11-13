@@ -7,7 +7,7 @@ import random
 from datetime import datetime, timezone, timedelta
 
 def get_humidity():
-    humidity_URL = "http://127.0.0.1/things/temp-hum-light-1/properties"
+    humidity_URL = "http://192.168.0.17/things/temp-hum-light-1/properties"
     response = requests.get(humidity_URL)
     property_text = response.text
     property_json = json.loads(property_text)
