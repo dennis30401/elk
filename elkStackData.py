@@ -19,7 +19,7 @@ def get_humidity():
     return hum
 
 def get_people():
-    people_URL = "http://http://140.134.25.64:16666/properties
+    people_URL = "http://http://140.134.25.64:16666/properties"
     response = requests.get(people_URL)
     property_text = response.text
     property_json = json.loads(property_text)
