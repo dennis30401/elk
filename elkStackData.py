@@ -94,8 +94,8 @@ def multipleSchedulers():
 
 if __name__ == '__main__':
     print("start scheduler")
-    #　multipleSchedulers()
+    multipleSchedulers()
     # no scheduler test
-    es = Elasticsearch(hosts='140.134.25.64', port=19200)
-    send_humidity_to_elastucSearch(es)
-    send_number_to_elastucSearch(es)
+    # es = Elasticsearch(hosts='140.134.25.64', port=19200)
+    # send_humidity_to_elastucSearch(es)
+    # send_number_to_elastucSearch(es)
