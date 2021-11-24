@@ -7,7 +7,7 @@ import random
 from datetime import datetime, timezone, timedelta
 
 def get_humidity():
-    humidity_URL = "http://192.168.0.16/things/temp-hum-light-1/properties"
+    humidity_URL = "http://192.168.0.196/things/temp-hum-light-1/properties"
     response = requests.get(humidity_URL)
     property_text = response.text
     property_json = json.loads(property_text)
@@ -19,14 +19,14 @@ def get_humidity():
     return hum
 
 def get_people():
-    # people_URL = "http://127.0.0.1:6666/properties"
-    # response = requests.get(people_URL)
-    # property_text = response.text
-    # property_json = json.loads(property_text)
+    people_URL = "http://http://140.134.25.64:16666/properties
+    response = requests.get(people_URL)
+    property_text = response.text
+    property_json = json.loads(property_text)
     # print("number:",property_json["amount"])
-    # return property_json["amount"]
-    hum = random.randint(0,100)
-    return hum
+    return property_json["amount"]
+    # hum = random.randint(0,100)
+    # return hum
 
 def get_datetime():   # get UTC+8 time format
     """ return formatted time(YYYY-MM-DD HH:MM:SS UTC+8) """
