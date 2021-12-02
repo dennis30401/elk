@@ -15,7 +15,7 @@ def get_humidity():
     # print("light:" , property_json["light"],end=' ')
     # print("temp:" , property_json["temp"])
     # hum = random.randint(0,100)
-    hum = property_json["hum"]
+    hum = property_json["temp"]
     return hum
 
 def get_people():
