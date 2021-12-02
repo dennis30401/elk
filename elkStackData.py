@@ -43,7 +43,7 @@ def send_number_to_elastucSearch(es):
         "time":fmDate,
         "PeopleNum":peopleNumber
     }
-    print("number:",peopleNumber,type(peopleNumber),fmDate)
+    # print("number:",peopleNumber,type(peopleNumber),fmDate)
     es.index(index='opentest',body = datas)
 
 def send_humidity_to_elastucSearch(es):
@@ -53,7 +53,7 @@ def send_humidity_to_elastucSearch(es):
         "time":fmDate,
         "humidity":humidity
     }
-    print("hum:",humidity,type(humidity),fmDate)
+    # print("hum:",humidity,type(humidity),fmDate)
     es.index(index='humtest',body = datas)
 
 def multipleSchedulers():
@@ -93,7 +93,7 @@ def multipleSchedulers():
         time.sleep(1)
 
 if __name__ == '__main__':
-    print("start scheduler")
+    # print("start scheduler")
     multipleSchedulers()
     # no scheduler test
     # es = Elasticsearch(hosts='140.134.25.64', port=19200)
