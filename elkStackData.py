@@ -124,8 +124,8 @@ def multipleSchedulers():
     scheduler3.every().hour.at(":55").do(send_temp_to_elastucSearch,es)
     while True:
         scheduler1.run_pending()
-        scheduler2.run_pending()
-        scheduler3.run_pending()
+        # scheduler2.run_pending()
+        # scheduler3.run_pending()
         time.sleep(1)
 
 if __name__ == '__main__':
