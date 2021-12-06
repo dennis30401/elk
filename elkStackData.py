@@ -35,7 +35,7 @@ def get_people():
     response = requests.get(people_URL)
     property_text = response.text
     property_json = json.loads(property_text)
-    # print("number:",property_json["amount"])
+    print("number:",property_json["amount"])
     return property_json["amount"]
     # hum = random.randint(0,100)
     # return hum
