@@ -95,7 +95,7 @@ def send_data_elk():
 
     datas = {
         "time" : fmDate,
-        "humidity" : humdity
+        "humidity" : humidity
     }
     es.index(index='humtest',body=datas)
 
