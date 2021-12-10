@@ -105,9 +105,9 @@ def send_data_elk():
     }
     es.index(index='temptest',body=datas)
     es.close()
-    print(peopleNumber,end='\n')
-    print(humidity,end='\n')
-    print(temperature)
+    # print(peopleNumber,end='\n')
+    # print(humidity,end='\n')
+    # print(temperature)
 
 def multipleSchedulers():
     scheduler1 = schedule.Scheduler()
@@ -129,6 +129,6 @@ def multipleSchedulers():
         time.sleep(1)
 
 if __name__ == '__main__':
-    # multipleSchedulers()
+    multipleSchedulers()
     # no scheduler test
-    send_data_elk()
+    # send_data_elk()
