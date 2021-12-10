@@ -23,9 +23,9 @@ from elasticsearch import Elasticsearch
 
 '''configure field'''
 
-data_peopleNumber_id = '2'
+data_peopleNumber_id = '1'
 data_humidity_id     = '3'
-data_temperature_id  = '1'
+data_temperature_id  = '2'
 logs_file_path       = "/home/pi/.webthings/log/logs.sqlite3"
 teacher_host         = '140.134.25.64'
 elasticsearh_port    = 19200
