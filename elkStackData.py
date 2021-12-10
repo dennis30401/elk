@@ -26,7 +26,7 @@ from elasticsearch import Elasticsearch
 data_peopleNumber_id = '2'
 data_humidity_id     = '3'
 data_temperature_id  = '1'
-logs_file_path       = "../.webthinsg/log/logs.sqlite3"
+logs_file_path       = "./.webthinsg/log/logs.sqlite3"
 teacher_host         = '140.134.25.64'
 elasticsearh_port    = 19200
 
