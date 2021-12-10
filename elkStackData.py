@@ -1,137 +1,134 @@
-import requests
-import json
-import time
-from elasticsearch import Elasticsearch
-import schedule
-import random
+import sqlite3, time
 from datetime import datetime, timezone, timedelta
+import schedule
+from sqlite3.dbapi2 import Cursor
+from elasticsearch import Elasticsearch
 
-def get_humidity():
-    humidity_URL = "http://192.168.0.196/things/temp-hum-light-1/properties"
-    response = requests.get(humidity_URL)
-    property_text = response.text
-    property_json = json.loads(property_text)
-    # print("humidity:" , property_json["hum"],end=' ')
-    # print("light:" , property_json["light"],end=' ')
-    # print("temp:" , property_json["temp"])
-    # hum = random.randint(0,100)
-    hum = property_json["hum"]
-    return hum
+'''
+ Sensor logs in logs.sqlite3 data DDL is: 
+ 
+ CREATE TABLE metricsNumber(
+     id INTEGER,
+     date DATE,
+     value REAL
+ )
+ 
+ There are also other table, but don;t know what they mean.
 
-def get_temp():
-    temp_URL = "http://192.168.0.196/things/temp-hum-light-1/properties"
-    response = requests.get(temp_URL)
-    property_text = response.text
-    property_json = json.loads(property_text)
-    # print("humidity:" , property_json["hum"],end=' ')
-    # print("light:" , property_json["light"],end=' ')
-    # print("temp:" , property_json["temp"])
-    # hum = random.randint(0,100)
-    temp = property_json["temp"]
-    return temp
+ Regardless of whether they are the number of people, humidity, temperature,
+ return data will look like [(4.0,), (0.0,), (4.0,)], 
+ list contain tuple, and the data type in tuple is float.
+ But limit 1 will contain only one tuple [(4.0,)]
+'''
 
-def get_people():
-    people_URL = "http://140.134.25.64:16666/properties"
-    response = requests.get(people_URL)
-    property_text = response.text
-    property_json = json.loads(property_text)
-    print("number:",property_json["amount"])
-    return property_json["amount"]
-    # hum = random.randint(0,100)
-    # return hum
+'''configure field'''
 
-def get_datetime():   # get UTC+8 time format
-    """ return formatted time(YYYY-MM-DD HH:MM:SS UTC+8) """
+data_peopleNumber_id = '2'
+data_humidity_id     = '3'
+data_temperature_id  = '1'
+logs_file_path       = "../.webthinsg/log/logs.sqlite3"
+teacher_host         = '140.134.25.64'
+elasticsearh_port    = 19200
+
+'''configure field'''
+
+
+def get_humidity( cursorObj : Cursor ) -> int:
+    '''get latest humidity in logs.sqlite3'''
+    id = data_humidity_id
+    sql_string = "select value  from metricsNumber where  id = "+ id +"  ORDER BY date desc LIMIT 1 ;"
+    cursorObj.execute(sql_string)
+    dataList = cursorObj.fetchall()
+    humidityFloat = dataList[0][0]
+    humidityInt = int(humidityFloat)
+    return humidityInt 
+
+def get_people( cursorObj : Cursor ) -> int:
+    '''get latest people number in logs.sqlite3'''
+    id =data_peopleNumber_id
+    sql_string = "select value  from metricsNumber where  id = "+ id +"  ORDER BY date desc LIMIT 1 ;"
+    cursorObj.execute(sql_string)
+    dataList = cursorObj.fetchall()
+    peopleFloat = dataList[0][0]
+    peopleInt = int(peopleFloat)
+    return peopleInt
+
+def get_temp( cursorObj : Cursor ) -> int:
+    '''get latest temperature in logs.sqlite3'''
+    id = data_temperature_id
+    sql_string = "select value  from metricsNumber where  id = "+ id +"  ORDER BY date desc LIMIT 1 ;"
+    cursorObj.execute(sql_string)
+    dataList = cursorObj.fetchall()
+    tempFloat = dataList[0][0]
+    tempInt = int(tempFloat)
+    return tempInt
+
+def get_datetime(haha: int) -> str:   # get UTC+8 time format
+    """ return formatted time (YYYY-MM-DD HH:MM UTC+8) """
     # set time zone(TW->UTC+8)
     tz = timezone(timedelta(hours=+8))
     # get the current time、 time zone, and convert to ISO format(to second) e.g. "2021-09-19T16:50:00+08:00"
-    gltime = datetime.now(tz).isoformat(timespec="seconds")
-    return gltime
+    formatTime = datetime.now(tz).isoformat(timespec="seconds")
+    return formatTime
 
-def send_number_to_elastucSearch(es):
-    fmDate = get_datetime()
-    peopleNumber = get_people()
-    datas = {
-        "time":fmDate,
-        "PeopleNum":peopleNumber
-    }
-    # print("number:",peopleNumber,type(peopleNumber),fmDate)
-    es.index(index='opentest',body = datas)
+def send_data_elk():
+    '''get data from sqlite, then send data to elasticsearch'''
+    # open connection to database
+    con = sqlite3.connect(logs_file_path)
+    cursorObj = con.cursor()
+    # Get the required data
+    peopleNumber = get_people(cursorObj)
+    temperature = get_temp(cursorObj)
+    humidity = get_humidity(cursorObj)    
+    # close connection
+    cursorObj.close()
+    con.close()
 
-def send_humidity_to_elastucSearch(es):
+    # send to elasticsearch
+    es = Elasticsearch(hosts=teacher_host, port=elasticsearh_port)
     fmDate = get_datetime()
-    humidity = get_humidity()
     datas = {
-        "time":fmDate,
-        "humidity":humidity
+        "time" : fmDate,
+        "PeopleNum" : peopleNumber
     }
-    # print("hum:",humidity,type(humidity),fmDate)
-    es.index(index='humtest',body = datas)
+    es.index(index='opentest',body=datas)
 
-def send_temp_to_elastucSearch(es):
-    fmDate = get_datetime()
-    temp = get_temp()
     datas = {
-        "time":fmDate,
-        "temp":temp
+        "time" : fmDate,
+        "humidity" : humdity
     }
-    # print("hum:",humidity,type(humidity),fmDate)
-    es.index(index='temptest',body = datas)    
-    
+    es.index(index='humtest',body=datas)
+
+    datas = {
+        "time" : fmDate,
+        "temp" : temperature
+    }
+    es.index(index='temptest',body=datas)
+    es.close()
+    print(peopleNumber,end='\n')
+    print(humidity,end='\n')
+    print(temperature)
+
 def multipleSchedulers():
-    """ Manually set the tasks you want to schedule """
-    es = Elasticsearch(hosts='140.134.25.64', port=19200)
-    scheduler1 = schedule.Scheduler()  # to send people number to es 
-    scheduler2 = schedule.Scheduler()  # to send humidity to es
-    scheduler3 = schedule.Scheduler()  # to send temp to es
-    scheduler1.every().hour.at(":00").do(send_number_to_elastucSearch,es)
-    scheduler1.every().hour.at(":05").do(send_number_to_elastucSearch,es)
-    scheduler1.every().hour.at(":10").do(send_number_to_elastucSearch,es)
-    scheduler1.every().hour.at(":15").do(send_number_to_elastucSearch,es)
-    scheduler1.every().hour.at(":20").do(send_number_to_elastucSearch,es)
-    scheduler1.every().hour.at(":25").do(send_number_to_elastucSearch,es)
-    scheduler1.every().hour.at(":30").do(send_number_to_elastucSearch,es)
-    scheduler1.every().hour.at(":35").do(send_number_to_elastucSearch,es)
-    scheduler1.every().hour.at(":40").do(send_number_to_elastucSearch,es)
-    scheduler1.every().hour.at(":45").do(send_number_to_elastucSearch,es)
-    scheduler1.every().hour.at(":50").do(send_number_to_elastucSearch,es)
-    scheduler1.every().hour.at(":55").do(send_number_to_elastucSearch,es)
+    scheduler1 = schedule.Scheduler()
+    scheduler1.every().hour.at(":00").do(send_data_elk)
+    scheduler1.every().hour.at(":05").do(send_data_elk)
+    scheduler1.every().hour.at(":10").do(send_data_elk)
+    scheduler1.every().hour.at(":15").do(send_data_elk)
+    scheduler1.every().hour.at(":20").do(send_data_elk)
+    scheduler1.every().hour.at(":25").do(send_data_elk)
+    scheduler1.every().hour.at(":30").do(send_data_elk)
+    scheduler1.every().hour.at(":35").do(send_data_elk)
+    scheduler1.every().hour.at(":40").do(send_data_elk)
+    scheduler1.every().hour.at(":45").do(send_data_elk)
+    scheduler1.every().hour.at(":50").do(send_data_elk)
+    scheduler1.every().hour.at(":55").do(send_data_elk)
 
-    scheduler2.every().hour.at(":00").do(send_humidity_to_elastucSearch,es)
-    scheduler2.every().hour.at(":05").do(send_humidity_to_elastucSearch,es)
-    scheduler2.every().hour.at(":10").do(send_humidity_to_elastucSearch,es)
-    scheduler2.every().hour.at(":15").do(send_humidity_to_elastucSearch,es)
-    scheduler2.every().hour.at(":20").do(send_humidity_to_elastucSearch,es)
-    scheduler2.every().hour.at(":25").do(send_humidity_to_elastucSearch,es)
-    scheduler2.every().hour.at(":30").do(send_humidity_to_elastucSearch,es)
-    scheduler2.every().hour.at(":35").do(send_humidity_to_elastucSearch,es)
-    scheduler2.every().hour.at(":40").do(send_humidity_to_elastucSearch,es)
-    scheduler2.every().hour.at(":45").do(send_humidity_to_elastucSearch,es)
-    scheduler2.every().hour.at(":50").do(send_humidity_to_elastucSearch,es)
-    scheduler2.every().hour.at(":55").do(send_humidity_to_elastucSearch,es)
-
-    scheduler3.every().hour.at(":00").do(send_temp_to_elastucSearch,es)
-    scheduler3.every().hour.at(":05").do(send_temp_to_elastucSearch,es)
-    scheduler3.every().hour.at(":10").do(send_temp_to_elastucSearch,es)
-    scheduler3.every().hour.at(":15").do(send_temp_to_elastucSearch,es)
-    scheduler3.every().hour.at(":20").do(send_temp_to_elastucSearch,es)
-    scheduler3.every().hour.at(":25").do(send_temp_to_elastucSearch,es)
-    scheduler3.every().hour.at(":30").do(send_temp_to_elastucSearch,es)
-    scheduler3.every().hour.at(":35").do(send_temp_to_elastucSearch,es)
-    scheduler3.every().hour.at(":40").do(send_temp_to_elastucSearch,es)
-    scheduler3.every().hour.at(":45").do(send_temp_to_elastucSearch,es)
-    scheduler3.every().hour.at(":50").do(send_temp_to_elastucSearch,es)
-    scheduler3.every().hour.at(":55").do(send_temp_to_elastucSearch,es)
     while True:
         scheduler1.run_pending()
-        # scheduler2.run_pending()
-        # scheduler3.run_pending()
         time.sleep(1)
 
 if __name__ == '__main__':
-    # print("start scheduler")
-    multipleSchedulers()
+    # multipleSchedulers()
     # no scheduler test
-    # es = Elasticsearch(hosts='140.134.25.64', port=19200)
-    # send_humidity_to_elastucSearch(es)
-    # send_number_to_elastucSearch(es)
+    send_data_elk()
