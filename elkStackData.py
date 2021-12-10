@@ -63,7 +63,7 @@ def get_temp( cursorObj : Cursor ) -> int:
     tempInt = int(tempFloat)
     return tempInt
 
-def get_datetime(haha: int) -> str:   # get UTC+8 time format
+def get_datetime() -> str:   # get UTC+8 time format
     """ return formatted time (YYYY-MM-DD HH:MM UTC+8) """
     # set time zone(TW->UTC+8)
     tz = timezone(timedelta(hours=+8))
