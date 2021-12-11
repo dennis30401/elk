@@ -21,8 +21,7 @@ from elasticsearch import Elasticsearch
  But limit 1 will contain only one tuple [(4.0,)]
 '''
 
-'''configure field'''
-
+'''database, ip, port, etc., configure field'''
 data_peopleNumber_id = '1'
 data_humidity_id     = '3'
 data_temperature_id  = '2'
@@ -30,8 +29,10 @@ logs_file_path       = "/home/pi/.webthings/log/logs.sqlite3"
 teacher_host         = '140.134.25.64'
 elasticsearh_port    = 19200
 
-'''configure field'''
-
+'''global value, if it is called in function, it needs to be declared as a global variable'''
+peopleNumber_old = 100
+humidity_old     = 100
+temperature_old  = 100
 
 def get_humidity( cursorObj : Cursor ) -> int:
     '''get latest humidity in logs.sqlite3'''
@@ -39,8 +40,15 @@ def get_humidity( cursorObj : Cursor ) -> int:
     sql_string = "select value  from metricsNumber where  id = "+ id +"  ORDER BY date desc LIMIT 1 ;"
     cursorObj.execute(sql_string)
     dataList = cursorObj.fetchall()
-    humidityFloat = dataList[0][0]
-    humidityInt = int(humidityFloat)
+    global humidity_old # handle "local variable referenced before assignment" error
+    if dataList:
+        # if dataList no empty, update new value
+        humidityFloat = dataList[0][0]
+        humidityInt = int(humidityFloat)
+        # update old value
+        humidity_old = humidityInt
+    else:
+        humidityInt = humidity_old
     return humidityInt 
 
 def get_people( cursorObj : Cursor ) -> int:
@@ -49,8 +57,13 @@ def get_people( cursorObj : Cursor ) -> int:
     sql_string = "select value  from metricsNumber where  id = "+ id +"  ORDER BY date desc LIMIT 1 ;"
     cursorObj.execute(sql_string)
     dataList = cursorObj.fetchall()
-    peopleFloat = dataList[0][0]
-    peopleInt = int(peopleFloat)
+    global peopleNumber_old
+    if dataList:
+        peopleFloat = dataList[0][0]
+        peopleInt = int(peopleFloat)
+        peopleNumber_old = peopleInt
+    else:
+        peopleInt = peopleNumber_old
     return peopleInt
 
 def get_temp( cursorObj : Cursor ) -> int:
@@ -59,8 +72,13 @@ def get_temp( cursorObj : Cursor ) -> int:
     sql_string = "select value  from metricsNumber where  id = "+ id +"  ORDER BY date desc LIMIT 1 ;"
     cursorObj.execute(sql_string)
     dataList = cursorObj.fetchall()
-    tempFloat = dataList[0][0]
-    tempInt = int(tempFloat)
+    global temperature_old
+    if dataList:
+        tempFloat = dataList[0][0]
+        tempInt = int(tempFloat)
+        temperature_old = tempInt
+    else:
+        tempInt = temperature_old
     return tempInt
 
 def get_datetime() -> str:   # get UTC+8 time format
@@ -129,6 +147,6 @@ def multipleSchedulers():
         time.sleep(1)
 
 if __name__ == '__main__':
-    multipleSchedulers()
+    # multipleSchedulers()
     # no scheduler test
-    # send_data_elk()
+    send_data_elk()
