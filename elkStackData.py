@@ -147,6 +147,6 @@ def multipleSchedulers():
         time.sleep(1)
 
 if __name__ == '__main__':
-    # multipleSchedulers()
+    multipleSchedulers()
     # no scheduler test
-    send_data_elk()
+    # send_data_elk()
